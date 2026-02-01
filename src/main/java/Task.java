@@ -9,11 +9,13 @@ public class Task {
         this.isDone = false;
     }
 
+    //gets the status of the task, if done will be marked with X, else nothing
     public String getStatusIcon(){
         return (isDone ? "X" : " ");
     }
 
+    //printer to print the status of the task
     public String toPrintStatus(){
-        return "[" + getStatusIcon() + "]" + taskName;
+        return "[" + getStatusIcon() + "]" + " " + taskName;
     }
 }
