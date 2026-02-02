@@ -50,7 +50,23 @@ public class Slave {
             else if (input.startsWith("mark") || input.startsWith("unmark")) {
                 String[] splitText = input.split(" ");
 
+
+                // checks the format of the mark message
+                if (splitText.length < 2) {
+                    System.out.print("input 'mark <number>' please, you trying to game the system\n" + line);
+                    continue;
+                }
+
+                // checks if the task number is a number
+                if (!splitText[1].matches("\\d+")) {
+                    System.out.print("task number is not a number???\n" + line);
+                    continue;
+                }
+
+                // minus one due to the position of the task in the task array is 1 less than the
+                // number the user inputs
                 int taskNumber = Integer.parseInt(splitText[1]) - 1;
+
 
                 // checks if the task number marked is within the number of tasks that has been
                 // added to the list
