@@ -1,12 +1,9 @@
-
-
 public class Task {
-    boolean isDone;
+    boolean isDone = false;
     String taskName;
 
     public Task(String taskName){
         this.taskName = taskName;
-        this.isDone = false;
     }
 
     //gets the status of the task, if done will be marked with X, else nothing
@@ -14,8 +11,14 @@ public class Task {
         return (isDone ? "X" : " ");
     }
 
+    public String getTypeIcon(){
+        return "?";
+    }
+
     //printer to print the status of the task
     public String toPrintStatus(){
-        return "[" + getStatusIcon() + "]" + " " + taskName;
+        return "[" + getTypeIcon() + "]" + "[" + getStatusIcon() + "]" +
+                " " + taskName;
     }
+
 }
