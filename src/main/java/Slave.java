@@ -24,8 +24,12 @@ public class Slave {
         int numberOfTasks = 0;
 
         while (true){
-            String input = in.nextLine();
-            Task task = new Task(input);
+            String input = in.nextLine().trim();
+
+            if (input.isEmpty()) {
+                // ignore blank enter / spaces-only input
+                continue;
+            }
 
             //if user inputs "bye", the bot will exit
             if (Objects.equals(input, "bye")) {
@@ -48,25 +52,22 @@ public class Slave {
 
             //if user inputs mark, it will mark as done in isDone, else if unmark then mark as undone
             else if (input.startsWith("mark") || input.startsWith("unmark")) {
-                String[] splitText = input.split(" ");
+                String[] splitText = input.trim().split("\\s+");
 
-
-                // checks the format of the mark message
+                // must be exactly: mark <number> or unmark <number>
                 if (splitText.length < 2) {
-                    System.out.print("input 'mark <number>' please, you trying to game the system\n" + line);
+                    System.out.print("bro put a task number: mark 1 / unmark 1\n" + line);
                     continue;
                 }
 
-                // checks if the task number is a number
-                if (!splitText[1].matches("\\d+")) {
-                    System.out.print("task number is not a number???\n" + line);
+                int taskNumber;
+
+                try {
+                    taskNumber = Integer.parseInt(splitText[1]) - 1;
+                } catch (NumberFormatException e) {
+                    System.out.print("task number must be a number eh (e.g. mark 2)\n" + line);
                     continue;
                 }
-
-                // minus one due to the position of the task in the task array is 1 less than the
-                // number the user inputs
-                int taskNumber = Integer.parseInt(splitText[1]) - 1;
-
 
                 // checks if the task number marked is within the number of tasks that has been
                 // added to the list
@@ -91,8 +92,8 @@ public class Slave {
 
 
             else {
-
                 //listOfTasks to keep track of what the user inputs, adds to the listOfTasks
+                Task task = new Task(input);
                 listOfTasks[numberOfTasks] = task;
                 System.out.print("added: " + input + "\n" + line);
 
