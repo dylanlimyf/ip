@@ -23,9 +23,17 @@ public class Slave {
                 continue;
             }
 
-            boolean shouldExit = handleInput(input);
-            if (shouldExit) {
-                return;
+            try {
+                boolean shouldExit = handleInput(input);
+                if (shouldExit) {
+                    return;
+                }
+            } catch (IllegalArgumentException e) {
+                // for errors you intentionally throw (later)
+                System.out.print(e.getMessage() + "\n" + LINE);
+            } catch (Exception e) {
+                // for unexpected errors (prevents crashing + stacktrace)
+                System.out.print("something went wrong on my end... try again\n" + LINE);
             }
         }
     }
