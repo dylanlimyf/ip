@@ -1,7 +1,6 @@
-import java.util.Objects;
 import java.util.Scanner;
 
-public class Slave {
+public class Main {
 
     private static final String LINE = "____________________________________________________________\n";
     private static final String GREETING = "morning boss\n";
@@ -68,7 +67,7 @@ public class Slave {
                 yield false;
             }
             default -> {
-                System.out.print("unknown command\n" + LINE);
+                System.out.print("unknown command\ntry list, todo, deadline, event to make events\nlist to show all tasks \nbye if you hate me\n" + LINE);
                 yield false;
             }
         };
