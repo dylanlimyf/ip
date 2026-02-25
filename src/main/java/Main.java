@@ -90,6 +90,10 @@ public class Main {
 
                 yield false;
             }
+            case "delete" -> {
+                deleteTask(input);
+                yield false;
+            }
             default -> {
                 System.out.print("unknown command\ntry list, todo, deadline, event to make events\nlist to show all tasks \nbye if you hate me\n" + LINE);
                 yield false;
@@ -97,6 +101,42 @@ public class Main {
         };
     }
 
+    private static void deleteTask(String input) {
+        String[] parts = input.split("\\s+");
+
+        if (parts.length < 2) {
+            System.out.println("bro so which number task do you want me to delete? \ntry delete <task number>");
+            return;
+        }
+
+        Integer index = parseTaskIndex(parts[1]);
+
+        if (index == null){
+            System.out.print("task number must be a number eh (e.g. delete 2)\n" + LINE);
+            return;
+        }
+
+        if (index >= taskCount){
+            System.out.println("so right, you want me to delete a task that is more than the number of tasks now, siao eh\n" + LINE);
+            return;
+        }
+
+//        if (!isValidIndex(index)){
+//            System.out.print("this task number aint a number, i want numbers >:(\ntry delete <number>\n" + LINE);
+//            return;
+//        }
+
+        Task removed = tasks[index];
+        for (int i = index; i < taskCount - 1; i++){
+            tasks[i] = tasks[i + 1];
+        }
+
+        tasks[taskCount - 1] = null;
+        taskCount--;
+
+        System.out.println("aight bet, task removed you lazy ahh\n" + removed.toPrintStatus() + "\nnumber of tasks left: " + taskCount + "\n" + LINE);
+
+    }
 
     private static void handleList() {
         for (int i = 0; i < taskCount; i++) {
