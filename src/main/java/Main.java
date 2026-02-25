@@ -1,4 +1,5 @@
 import java.util.Scanner;
+import java.io.File;
 
 public class Main {
 
@@ -10,10 +11,18 @@ public class Main {
     private static final Task[] tasks = new Task[100];
     private static int taskCount = 0;
     private static int toSettleCount = 0;
+    private static final Storage storage = new Storage("data/list.txt");
 
 
     public static void main(String[] args) {
         printWelcome();
+
+        try {
+            taskCount = storage.readFile(tasks);
+        } catch (Exception e) {
+            System.out.print("could not load saved tasks, starting fresh\n" + LINE);
+            taskCount = 0;
+        }
 
         Scanner in = new Scanner(System.in);
         while (true) {
@@ -36,6 +45,7 @@ public class Main {
             }
         }
     }
+
 
     private static void printWelcome() {
         System.out.print(LINE + GREETING + DO_REQUEST + LINE);
@@ -60,10 +70,24 @@ public class Main {
             }
             case "mark", "unmark" -> {
                 handleMarkUnmark(input);
+
+                try {
+                    storage.writeFile(tasks, taskCount);
+                } catch (Exception e) {
+                    System.out.print("could not save tasks\n" + LINE);
+                }
+
                 yield false;
             }
             case "todo", "deadline", "event" -> {
                 handleAddTask(input);
+
+                try {
+                    storage.writeFile(tasks, taskCount);
+                } catch (Exception e) {
+                    System.out.print("could not save tasks\n" + LINE);
+                }
+
                 yield false;
             }
             default -> {
@@ -155,7 +179,8 @@ public class Main {
         }
 
         boolean markDone = input.startsWith("mark");
-        tasks[idx].isDone = markDone;
+        if (markDone) tasks[idx].mark();
+        else tasks[idx].unmark();
 
         if (markDone) {
             System.out.print("shiok, ok this task settled\n");
