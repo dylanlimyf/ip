@@ -1,5 +1,4 @@
 import java.util.Scanner;
-import java.io.File;
 
 public class Main {
 
@@ -18,14 +17,33 @@ public class Main {
         printWelcome();
 
         try {
-            taskCount = storage.readFile(tasks);
+            Storage.ReadResult readResult = storage.readFile(tasks);
+            taskCount = readResult.getCount();
+
+            if (readResult.getSkipped() > 0) {
+                String suffix = (readResult.getSkipped() == 1) ? "" : "s";
+                System.out.print("skipped " + readResult.getSkipped()
+                        + " corrupted saved task" + suffix + "\n" + LINE);
+            }
+            if (readResult.isTruncated()) {
+                System.out.print("task list full; some saved tasks were not loaded\n" + LINE);
+            }
         } catch (Exception e) {
-            System.out.print("could not load saved tasks, starting fresh\n" + LINE);
+            String details = e.getMessage();
+            if (details == null || details.isBlank()) {
+                System.out.print("could not load saved tasks, starting fresh\n" + LINE);
+            } else {
+                System.out.print("could not load saved tasks (" + details + "), starting fresh\n" + LINE);
+            }
             taskCount = 0;
         }
 
         Scanner in = new Scanner(System.in);
         while (true) {
+            if (!in.hasNextLine()) {
+                System.out.print(GOODBYE);
+                return;
+            }
             String input = in.nextLine().trim();
             if (input.isEmpty()) {
                 continue;
@@ -36,8 +54,8 @@ public class Main {
                 if (shouldExit) {
                     return;
                 }
-            } catch (IllegalArgumentException e) {
-                // for errors you intentionally throw (later)
+            } catch (DukeException e) {
+                // for user-correctable errors
                 System.out.print(e.getMessage() + "\n" + LINE);
             } catch (Exception e) {
                 // for unexpected errors (prevents crashing + stacktrace)
@@ -52,7 +70,7 @@ public class Main {
     }
 
     // returns true if program should exit
-    private static boolean handleInput(String input) {
+    private static boolean handleInput(String input) throws DukeException {
         input = input.trim();
         if (input.isEmpty()) return false;
 
@@ -70,62 +88,40 @@ public class Main {
             }
             case "mark", "unmark" -> {
                 handleMarkUnmark(input);
-
-                try {
-                    storage.writeFile(tasks, taskCount);
-                } catch (Exception e) {
-                    System.out.print("could not save tasks\n" + LINE);
-                }
+                saveTasks();
 
                 yield false;
             }
             case "todo", "deadline", "event" -> {
                 handleAddTask(input);
-
-                try {
-                    storage.writeFile(tasks, taskCount);
-                } catch (Exception e) {
-                    System.out.print("could not save tasks\n" + LINE);
-                }
+                saveTasks();
 
                 yield false;
             }
             case "delete" -> {
                 deleteTask(input);
+                saveTasks();
+
                 yield false;
             }
             default -> {
-                System.out.print("unknown command\ntry list, todo, deadline, event to make events\nlist to show all tasks \nbye if you hate me\n" + LINE);
-                yield false;
+                throw new DukeException("unknown command\ntry list, todo, deadline, event to make events\n"
+                        + "list to show all tasks \nbye if you hate me");
             }
         };
     }
 
-    private static void deleteTask(String input) {
+    private static void deleteTask(String input) throws DukeException {
         String[] parts = input.split("\\s+");
 
+        if (taskCount == 0) {
+            throw new DukeException("no tasks to delete yet");
+        }
         if (parts.length < 2) {
-            System.out.println("bro so which number task do you want me to delete? \ntry delete <task number>");
-            return;
+            throw new DukeException("bro so which number task do you want me to delete?\ntry delete <task number>");
         }
 
-        Integer index = parseTaskIndex(parts[1]);
-
-        if (index == null){
-            System.out.print("task number must be a number eh (e.g. delete 2)\n" + LINE);
-            return;
-        }
-
-        if (index >= taskCount){
-            System.out.println("so right, you want me to delete a task that is more than the number of tasks now, siao eh\n" + LINE);
-            return;
-        }
-
-//        if (!isValidIndex(index)){
-//            System.out.print("this task number aint a number, i want numbers >:(\ntry delete <number>\n" + LINE);
-//            return;
-//        }
-
+        int index = parseTaskIndex(parts[1]);
         Task removed = tasks[index];
         for (int i = index; i < taskCount - 1; i++){
             tasks[i] = tasks[i + 1];
@@ -134,11 +130,15 @@ public class Main {
         tasks[taskCount - 1] = null;
         taskCount--;
 
-        System.out.println("aight bet, task removed you lazy ahh\n" + removed.toPrintStatus() + "\nnumber of tasks left: " + taskCount + "\n" + LINE);
-
+        System.out.println("aight bet, task removed you lazy ahh\n" + removed.toPrintStatus()
+                + "\nnumber of tasks left: " + taskCount + "\n" + LINE);
     }
 
     private static void handleList() {
+        if (taskCount == 0) {
+            System.out.print("no tasks yet\n" + LINE);
+            return;
+        }
         for (int i = 0; i < taskCount; i++) {
             System.out.print((i + 1) + ". " + tasks[i].toPrintStatus() + "\n");
         }
@@ -146,30 +146,35 @@ public class Main {
     }
 
 
-    private static void handleAddTask(String input) {
+    private static void handleAddTask(String input) throws DukeException {
+        if (taskCount >= tasks.length) {
+            throw new DukeException("task list full, delete something first");
+        }
+
         String[] parts = input.trim().split("\\s+", 2); // split into: command + rest
         String cmd = parts[0];
-        String rest = (parts.length > 1) ? parts[1] : "";
+        String rest = (parts.length > 1) ? parts[1].trim() : "";
 
         switch (cmd) {
 
         case "todo":
             if (rest.isBlank()) {
-                System.out.print("todo but nothing to do? give me something\n" + LINE);
-                return;
+                throw new DukeException("todo but nothing to do? give me something");
             }
             tasks[taskCount] = new ToDo(rest);
             break;
 
         case "event":
 
+            if (rest.isBlank()) {
+                throw new DukeException("event but nothing to describe? give me something");
+            }
             if (rest.contains("/from") && rest.contains("/to")){
                 rest = rest.replace("/from", " (from:")
                            .replace("/to", " to:") + ")";
             } else {
-                System.out.print("bro like an event has a start time and end time, yours is ahh." +
-                                 " give me the start by using /from and end time using /to \n" + LINE);
-                return;
+                throw new DukeException("bro like an event has a start time and end time, yours is ahh."
+                        + " give me the start by using /from and end time using /to");
             }
 
             tasks[taskCount] = new Events(rest);
@@ -177,18 +182,19 @@ public class Main {
 
         case "deadline":
 
+            if (rest.isBlank()) {
+                throw new DukeException("deadline but no task... give me one");
+            }
             if (rest.contains("/by")){
                 rest = rest.replace("/by", " by:");
             } else {
-                System.out.print("deadline but no date... give me one by setting /by <deadline> \n" + LINE);
-                return;
+                throw new DukeException("deadline but no date... give me one by setting /by <deadline>");
             }
 
             tasks[taskCount] = new Deadlines(rest);
             break;
         default:
-            System.out.print("unknown task type: " + cmd + "\n" + LINE);
-            return; // don't increment taskCount
+            throw new DukeException("unknown task type: " + cmd);
         }
 
         System.out.print("added: \n" + "  " + tasks[taskCount].toPrintStatus() + "\n" +
@@ -198,25 +204,18 @@ public class Main {
         taskCount++;
     }
 
-    private static void handleMarkUnmark(String input) {
+    private static void handleMarkUnmark(String input) throws DukeException {
         String[] parts = input.split("\\s+");
 
         // must be exactly: mark <number> or unmark <number>
         if (parts.length < 2) {
-            System.out.print("bro put a task number: mark 1 / unmark 1\n" + LINE);
-            return;
+            throw new DukeException("bro put a task number: mark 1 / unmark 1");
+        }
+        if (taskCount == 0) {
+            throw new DukeException("no tasks to mark or unmark yet");
         }
 
-        Integer idx = parseTaskIndex(parts[1]);
-        if (idx == null) {
-            System.out.print("task number must be a number eh (e.g. mark 2)\n" + LINE);
-            return;
-        }
-
-        if (!isValidIndex(idx)) {
-            System.out.print("wtf is this task number, make it make sense\n" + LINE);
-            return;
-        }
+        int idx = parseTaskIndex(parts[1]);
 
         boolean markDone = input.startsWith("mark");
         if (markDone) tasks[idx].mark();
@@ -231,17 +230,29 @@ public class Main {
         System.out.print("  " + tasks[idx].toPrintStatus() + "\n" + LINE);
     }
 
-    // converts "2" -> 1, returns null if not a number
-    private static Integer parseTaskIndex(String oneBasedNumber) {
+    // converts 1-based input to 0-based index, throws on invalid input
+    private static int parseTaskIndex(String oneBasedNumber) throws DukeException {
         try {
-            return Integer.parseInt(oneBasedNumber) - 1;
+            int idx = Integer.parseInt(oneBasedNumber) - 1;
+            if (idx < 0 || idx >= taskCount) {
+                throw new DukeException("task number must be between 1 and " + taskCount);
+            }
+            return idx;
         } catch (NumberFormatException e) {
-            return null;
+            throw new DukeException("task number must be a number eh (e.g. 2)");
         }
     }
 
-
-    private static boolean isValidIndex(int idx) {
-        return idx >= 0 && idx < taskCount;
+    private static void saveTasks() {
+        try {
+            storage.writeFile(tasks, taskCount);
+        } catch (Exception e) {
+            String details = e.getMessage();
+            if (details == null || details.isBlank()) {
+                System.out.print("could not save tasks\n" + LINE);
+            } else {
+                System.out.print("could not save tasks: " + details + "\n" + LINE);
+            }
+        }
     }
 }

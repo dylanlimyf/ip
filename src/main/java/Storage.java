@@ -10,6 +10,30 @@ public class Storage {
         this.filePath = filePath;
     }
 
+    public static class ReadResult {
+        private final int count;
+        private final int skipped;
+        private final boolean truncated;
+
+        public ReadResult(int count, int skipped, boolean truncated) {
+            this.count = count;
+            this.skipped = skipped;
+            this.truncated = truncated;
+        }
+
+        public int getCount() {
+            return count;
+        }
+
+        public int getSkipped() {
+            return skipped;
+        }
+
+        public boolean isTruncated() {
+            return truncated;
+        }
+    }
+
     public void doesFileExist() throws IOException {
         File f = new File(filePath);
         File parent = f.getParentFile();
@@ -30,11 +54,13 @@ public class Storage {
     }
 
     // Level 7: load on startup
-    public int readFile(Task[] tasks) throws IOException {
+    public ReadResult readFile(Task[] tasks) throws IOException {
         doesFileExist();
 
         File f = new File(filePath);
         int count = 0;
+        int skipped = 0;
+        boolean truncated = false;
 
         try (Scanner s = new Scanner(f)) {
             while (s.hasNextLine()) {
@@ -42,14 +68,19 @@ public class Storage {
                 if (line.isEmpty()) continue;
 
                 try {
+                    if (count >= tasks.length) {
+                        truncated = true;
+                        continue;
+                    }
                     tasks[count++] = parseLine(line);
-                } catch (Exception corrupted) {
+                } catch (IllegalArgumentException corrupted) {
                     // skip if file is corrupted
+                    skipped++;
                 }
             }
         }
 
-        return count;
+        return new ReadResult(count, skipped, truncated);
     }
 
     // Level 7: save whenever list changes
@@ -72,6 +103,9 @@ public class Storage {
         }
 
         String type = p[0];
+        if (!p[1].equals("0") && !p[1].equals("1")) {
+            throw new IllegalArgumentException("Bad done flag");
+        }
         boolean done = p[1].equals("1");
         String taskName = p[2];
 
