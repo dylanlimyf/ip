@@ -1,0 +1,15 @@
+public class AddCommand extends Command {
+
+    private final Task task;
+
+    public AddCommand(Task task) {
+        this.task = task;
+    }
+
+    @Override
+    public void execute(TaskList tasks, Ui ui, Storage storage) throws DukeException {
+        tasks.add(task);
+        ui.showAdded(task, tasks.size());
+        save(tasks, storage, ui);
+    }
+}

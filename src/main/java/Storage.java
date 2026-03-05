@@ -10,19 +10,19 @@ public class Storage {
         this.filePath = filePath;
     }
 
-    public static class ReadResult {
-        private final int count;
+    public static class LoadResult {
+        private final TaskList tasks;
         private final int skipped;
         private final boolean truncated;
 
-        public ReadResult(int count, int skipped, boolean truncated) {
-            this.count = count;
+        public LoadResult(TaskList tasks, int skipped, boolean truncated) {
+            this.tasks = tasks;
             this.skipped = skipped;
             this.truncated = truncated;
         }
 
-        public int getCount() {
-            return count;
+        public TaskList getTasks() {
+            return tasks;
         }
 
         public int getSkipped() {
@@ -54,25 +54,28 @@ public class Storage {
     }
 
     // Level 7: load on startup
-    public ReadResult readFile(Task[] tasks) throws IOException {
+    public LoadResult load() throws IOException {
         doesFileExist();
 
         File f = new File(filePath);
-        int count = 0;
+        TaskList tasks = new TaskList();
         int skipped = 0;
         boolean truncated = false;
 
         try (Scanner s = new Scanner(f)) {
             while (s.hasNextLine()) {
                 String line = s.nextLine().trim();
-                if (line.isEmpty()) continue;
+                if (line.isEmpty()) {
+                    continue;
+                }
 
                 try {
-                    if (count >= tasks.length) {
+                    if (tasks.isFull()) {
                         truncated = true;
                         continue;
                     }
-                    tasks[count++] = parseLine(line);
+                    Task task = parseLine(line);
+                    tasks.addLoaded(task);
                 } catch (IllegalArgumentException corrupted) {
                     // skip if file is corrupted
                     skipped++;
@@ -80,16 +83,16 @@ public class Storage {
             }
         }
 
-        return new ReadResult(count, skipped, truncated);
+        return new LoadResult(tasks, skipped, truncated);
     }
 
     // Level 7: save whenever list changes
-    public void writeFile(Task[] tasks, int taskCount) throws IOException {
+    public void save(TaskList tasks) throws IOException {
         doesFileExist();
 
         try (FileWriter fw = new FileWriter(filePath)) {
-            for (int i = 0; i < taskCount; i++) {
-                fw.write(tasks[i].toSaveString());
+            for (int i = 0; i < tasks.size(); i++) {
+                fw.write(tasks.get(i).toSaveString());
                 fw.write(System.lineSeparator());
             }
         }
@@ -124,7 +127,9 @@ public class Storage {
             throw new IllegalArgumentException("Unknown type");
         }
 
-        if (done) t.mark();
+        if (done) {
+            t.mark();
+        }
         return t;
     }
 }
