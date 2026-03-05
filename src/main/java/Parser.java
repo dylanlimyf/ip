@@ -1,3 +1,6 @@
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+
 public class Parser {
 
     public static Command parse(String input) throws DukeException {
@@ -39,12 +42,27 @@ public class Parser {
         if (rest.isBlank()) {
             throw new DukeException("deadline but no task... give me one");
         }
-        if (rest.contains("/by")) {
-            rest = rest.replace("/by", " by:");
-        } else {
+        if (!rest.contains("/by")) {
             throw new DukeException("deadline but no date... give me one by setting /by <deadline>");
         }
-        return new AddCommand(new Deadlines(rest));
+
+        String[] parts = rest.split("\\s+/by\\s+", 2);
+        if (parts.length < 2 || parts[0].isBlank() || parts[1].isBlank()) {
+            throw new DukeException("deadline but no date... give me one by setting /by <deadline>");
+        }
+
+        String description = parts[0].trim();
+        String byRaw = parts[1].trim();
+
+        try {
+            LocalDate by = LocalDate.parse(byRaw);
+            if (by.isBefore(LocalDate.now())) {
+                throw new DukeException("siao ah, what kind of task deadline is before today");
+            }
+            return new AddCommand(new Deadlines(description, by));
+        } catch (DateTimeParseException e) {
+            throw new DukeException("deadline date must be yyyy-mm-dd (e.g. 2019-10-15)");
+        }
     }
 
     private static Command parseEvent(String rest) throws DukeException {

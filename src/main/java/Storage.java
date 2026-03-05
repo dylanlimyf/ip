@@ -2,6 +2,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 public class Storage {
     private final String filePath;
@@ -99,9 +101,9 @@ public class Storage {
     }
 
     private Task parseLine(String line) {
-        // expected: TYPE | 0/1 | taskName
-        String[] p = line.split("\\s*\\|\\s*", 3);
-        if (p.length != 3) {
+        // expected: TYPE | 0/1 | description [| date]
+        String[] p = line.split("\\s*\\|\\s*");
+        if (p.length < 3) {
             throw new IllegalArgumentException("Bad line");
         }
 
@@ -110,18 +112,26 @@ public class Storage {
             throw new IllegalArgumentException("Bad done flag");
         }
         boolean done = p[1].equals("1");
-        String taskName = p[2];
+        String description = p[2];
 
         Task t;
         switch (type) {
         case "T":
-            t = new ToDo(taskName);
+            t = new ToDo(description);
             break;
         case "D":
-            t = new Deadlines(taskName);
+            if (p.length < 4) {
+                throw new IllegalArgumentException("Missing deadline date");
+            }
+            try {
+                LocalDate by = LocalDate.parse(p[3]);
+                t = new Deadlines(description, by);
+            } catch (DateTimeParseException e) {
+                throw new IllegalArgumentException("Bad deadline date");
+            }
             break;
         case "E":
-            t = new Events(taskName);
+            t = new Events(description);
             break;
         default:
             throw new IllegalArgumentException("Unknown type");

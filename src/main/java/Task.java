@@ -1,9 +1,9 @@
 public class Task {
-    boolean isDone = false;
-    String taskName;
+    protected boolean isDone = false;
+    protected final String description;
 
-    public Task(String taskName){
-        this.taskName = taskName;
+    public Task(String description) {
+        this.description = description;
     }
 
     public void mark() {
@@ -25,10 +25,10 @@ public class Task {
 
     public String toPrintStatus(){
         return "[" + getTypeIcon() + "]" + "[" + getStatusIcon() + "]" +
-                " " + taskName;
+                " " + description;
     }
 
     public String toSaveString() {
-        return getTypeIcon() + " | " + (isDone ? "1" : "0") + " | " + taskName;
+        return getTypeIcon() + " | " + (isDone ? "1" : "0") + " | " + description;
     }
 }
