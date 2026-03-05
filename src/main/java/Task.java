@@ -31,4 +31,8 @@ public class Task {
     public String toSaveString() {
         return getTypeIcon() + " | " + (isDone ? "1" : "0") + " | " + description;
     }
+
+    public boolean matches(String keyword) {
+        return description.contains(keyword);
+    }
 }

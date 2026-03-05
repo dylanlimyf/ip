@@ -90,6 +90,18 @@ public class Ui {
         System.out.print(LINE);
     }
 
+    public void showFindResults(TaskList matches) {
+        if (matches.size() == 0) {
+            System.out.print("dont have such task...\n" + LINE);
+            return;
+        }
+        System.out.print("Here are the matching tasks in your list:\n");
+        for (int i = 0; i < matches.size(); i++) {
+            System.out.print((i + 1) + ". " + matches.get(i).toPrintStatus() + "\n");
+        }
+        System.out.print(LINE);
+    }
+
     public void showAdded(Task task, int taskCount) {
         System.out.print("added: \n" + "  " + task.toPrintStatus() + "\n"
                 + "now you need to settle " + taskCount + " tasks\n" + LINE);

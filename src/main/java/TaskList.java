@@ -58,6 +58,16 @@ public class TaskList {
         tasks[index].unmark();
     }
 
+    public TaskList find(String keyword) {
+        TaskList matches = new TaskList(size);
+        for (int i = 0; i < size; i++) {
+            if (tasks[i].matches(keyword)) {
+                matches.addLoaded(tasks[i]);
+            }
+        }
+        return matches;
+    }
+
     public boolean isFull() {
         return size >= tasks.length;
     }

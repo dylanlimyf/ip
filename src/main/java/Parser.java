@@ -17,6 +17,7 @@ public class Parser {
         return switch (cmd) {
         case "bye" -> new ExitCommand();
         case "list" -> new ListCommand();
+        case "find" -> parseFind(rest);
         case "mark" -> new MarkCommand(parseIndex(trimmed,
                 "bro put a task number: mark 1 / unmark 1"), true);
         case "unmark" -> new MarkCommand(parseIndex(trimmed,
@@ -77,6 +78,13 @@ public class Parser {
                     + " give me the start by using /from and end time using /to");
         }
         return new AddCommand(new Events(rest));
+    }
+
+    private static Command parseFind(String rest) throws DukeException {
+        if (rest.isBlank()) {
+            throw new DukeException("bro put a keyword: find <keyword>");
+        }
+        return new FindCommand(rest);
     }
 
     private static int parseIndex(String input, String missingMessage) throws DukeException {
