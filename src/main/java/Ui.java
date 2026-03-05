@@ -1,5 +1,8 @@
 import java.util.Scanner;
 
+/**
+ * Handles all user-facing input and output.
+ */
 public class Ui {
 
     private static final String LINE = "____________________________________________________________\n";
@@ -31,14 +34,25 @@ public class Ui {
 
     private final Scanner in;
 
+    /**
+     * Creates a UI backed by standard input.
+     */
     public Ui() {
         in = new Scanner(System.in);
     }
 
+    /**
+     * Displays the welcome message and logo.
+     */
     public void showWelcome() {
         System.out.print(LINE + LOGO + LINE + GREETING + DO_REQUEST + LINE);
     }
 
+    /**
+     * Reads the next command line from the user.
+     *
+     * @return the raw input line, or null if input is closed
+     */
     public String readCommand() {
         if (!in.hasNextLine()) {
             return null;
@@ -46,19 +60,35 @@ public class Ui {
         return in.nextLine();
     }
 
+    /**
+     * Displays the goodbye message.
+     */
     public void showGoodbye() {
         System.out.print(GOODBYE);
     }
 
+    /**
+     * Informs the user about skipped corrupted tasks during load.
+     *
+     * @param skipped number of skipped entries
+     */
     public void showLoadingSkipped(int skipped) {
         String suffix = (skipped == 1) ? "" : "s";
         System.out.print("skipped " + skipped + " corrupted saved task" + suffix + "\n" + LINE);
     }
 
+    /**
+     * Informs the user that some tasks were truncated during load.
+     */
     public void showLoadingTruncated() {
         System.out.print("task list full; some saved tasks were not loaded\n" + LINE);
     }
 
+    /**
+     * Reports a load error.
+     *
+     * @param details error details (may be blank)
+     */
     public void showLoadingError(String details) {
         if (details == null || details.isBlank()) {
             System.out.print("could not load saved tasks, starting fresh\n" + LINE);
@@ -67,10 +97,20 @@ public class Ui {
         }
     }
 
+    /**
+     * Displays an error message.
+     *
+     * @param message message to display
+     */
     public void showError(String message) {
         System.out.print(message + "\n" + LINE);
     }
 
+    /**
+     * Reports a save error.
+     *
+     * @param details error details (may be blank)
+     */
     public void showSaveError(String details) {
         if (details == null || details.isBlank()) {
             System.out.print("could not save tasks\n" + LINE);
@@ -79,6 +119,11 @@ public class Ui {
         }
     }
 
+    /**
+     * Displays the current task list.
+     *
+     * @param tasks task list to show
+     */
     public void showTaskList(TaskList tasks) {
         if (tasks.size() == 0) {
             System.out.print("no tasks yet\n" + LINE);
@@ -90,6 +135,11 @@ public class Ui {
         System.out.print(LINE);
     }
 
+    /**
+     * Displays find results.
+     *
+     * @param matches matching tasks
+     */
     public void showFindResults(TaskList matches) {
         if (matches.size() == 0) {
             System.out.print("dont have such task...\n" + LINE);
@@ -102,20 +152,42 @@ public class Ui {
         System.out.print(LINE);
     }
 
+    /**
+     * Shows a confirmation for adding a task.
+     *
+     * @param task added task
+     * @param taskCount new task count
+     */
     public void showAdded(Task task, int taskCount) {
         System.out.print("added: \n" + "  " + task.toPrintStatus() + "\n"
                 + "now you need to settle " + taskCount + " tasks\n" + LINE);
     }
 
+    /**
+     * Shows a confirmation for deleting a task.
+     *
+     * @param task removed task
+     * @param taskCount new task count
+     */
     public void showDeleted(Task task, int taskCount) {
         System.out.println("aight bet, task removed you lazy ahh\n" + task.toPrintStatus()
                 + "\nnumber of tasks left: " + taskCount + "\n" + LINE);
     }
 
+    /**
+     * Shows a confirmation for marking a task.
+     *
+     * @param task marked task
+     */
     public void showMarked(Task task) {
         System.out.print("shiok, ok this task settled\n" + "  " + task.toPrintStatus() + "\n" + LINE);
     }
 
+    /**
+     * Shows a confirmation for unmarking a task.
+     *
+     * @param task unmarked task
+     */
     public void showUnmarked(Task task) {
         System.out.print("so like did u do it already or not, make up ur mind\n"
                 + "  " + task.toPrintStatus() + "\n" + LINE);

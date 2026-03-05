@@ -1,13 +1,25 @@
+/**
+ * Marks or unmarks a task.
+ */
 public class MarkCommand extends Command {
 
     private final int index;
     private final boolean markDone;
 
+    /**
+     * Creates a mark/unmark command.
+     *
+     * @param index zero-based index
+     * @param markDone true to mark, false to unmark
+     */
     public MarkCommand(int index, boolean markDone) {
         this.index = index;
         this.markDone = markDone;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws DukeException {
         if (tasks.size() == 0) {

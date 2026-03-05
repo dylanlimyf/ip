@@ -5,37 +5,67 @@ import java.util.Scanner;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
+/**
+ * Handles loading and saving tasks to disk.
+ */
 public class Storage {
     private final String filePath;
 
+    /**
+     * Creates a storage with the given file path.
+     *
+     * @param filePath storage file path
+     */
     public Storage(String filePath) {
         this.filePath = filePath;
     }
 
+    /**
+     * Result of loading tasks from storage.
+     */
     public static class LoadResult {
         private final TaskList tasks;
         private final int skipped;
         private final boolean truncated;
 
+        /**
+         * Creates a load result.
+         *
+         * @param tasks loaded tasks
+         * @param skipped number of skipped corrupted entries
+         * @param truncated whether extra tasks were truncated
+         */
         public LoadResult(TaskList tasks, int skipped, boolean truncated) {
             this.tasks = tasks;
             this.skipped = skipped;
             this.truncated = truncated;
         }
 
+        /**
+         * Returns the loaded task list.
+         */
         public TaskList getTasks() {
             return tasks;
         }
 
+        /**
+         * Returns number of skipped entries.
+         */
         public int getSkipped() {
             return skipped;
         }
 
+        /**
+         * Returns true if the load was truncated due to capacity.
+         */
         public boolean isTruncated() {
             return truncated;
         }
     }
 
+    /**
+     * Ensures the storage file and parent directory exist.
+     */
     public void doesFileExist() throws IOException {
         File f = new File(filePath);
         File parent = f.getParentFile();
@@ -56,6 +86,12 @@ public class Storage {
     }
 
     // Level 7: load on startup
+    /**
+     * Loads tasks from storage.
+     *
+     * @return load result with tasks and warnings
+     * @throws IOException if file operations fail
+     */
     public LoadResult load() throws IOException {
         doesFileExist();
 
@@ -89,6 +125,12 @@ public class Storage {
     }
 
     // Level 7: save whenever list changes
+    /**
+     * Saves tasks to storage.
+     *
+     * @param tasks tasks to save
+     * @throws IOException if file operations fail
+     */
     public void save(TaskList tasks) throws IOException {
         doesFileExist();
 
@@ -100,6 +142,12 @@ public class Storage {
         }
     }
 
+    /**
+     * Parses a saved task line into a Task.
+     *
+     * @param line raw saved line
+     * @return parsed task
+     */
     private Task parseLine(String line) {
         // expected: TYPE | 0/1 | description [| date]
         String[] p = line.split("\\s*\\|\\s*");

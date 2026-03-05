@@ -1,8 +1,18 @@
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
+/**
+ * Parses raw user input into executable commands.
+ */
 public class Parser {
 
+    /**
+     * Parses a raw input line into a command.
+     *
+     * @param input raw user input
+     * @return parsed command
+     * @throws DukeException if the command is invalid
+     */
     public static Command parse(String input) throws DukeException {
         String trimmed = input.trim();
         if (trimmed.isEmpty()) {
@@ -32,6 +42,9 @@ public class Parser {
         };
     }
 
+    /**
+     * Parses a todo command.
+     */
     private static Command parseTodo(String rest) throws DukeException {
         if (rest.isBlank()) {
             throw new DukeException("todo but nothing to do? give me something");
@@ -39,6 +52,9 @@ public class Parser {
         return new AddCommand(new ToDo(rest));
     }
 
+    /**
+     * Parses a deadline command and validates the date.
+     */
     private static Command parseDeadline(String rest) throws DukeException {
         if (rest.isBlank()) {
             throw new DukeException("deadline but no task... give me one");
@@ -66,6 +82,9 @@ public class Parser {
         }
     }
 
+    /**
+     * Parses an event command with /from and /to.
+     */
     private static Command parseEvent(String rest) throws DukeException {
         if (rest.isBlank()) {
             throw new DukeException("event but nothing to describe? give me something");
@@ -80,6 +99,9 @@ public class Parser {
         return new AddCommand(new Events(rest));
     }
 
+    /**
+     * Parses a find command.
+     */
     private static Command parseFind(String rest) throws DukeException {
         if (rest.isBlank()) {
             throw new DukeException("bro put a keyword: find <keyword>");
@@ -87,6 +109,9 @@ public class Parser {
         return new FindCommand(rest);
     }
 
+    /**
+     * Parses a one-based index from a command line.
+     */
     private static int parseIndex(String input, String missingMessage) throws DukeException {
         String[] parts = input.trim().split("\\s+");
         if (parts.length < 2) {

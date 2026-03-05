@@ -1,15 +1,26 @@
+/**
+ * Entry point and coordinator for the task app.
+ */
 public class Main {
 
     private final Storage storage;
     private final Ui ui;
     private TaskList tasks;
 
+    /**
+     * Creates the app with a storage file path.
+     *
+     * @param filePath storage file location
+     */
     public Main(String filePath) {
         ui = new Ui();
         storage = new Storage(filePath);
         tasks = new TaskList();
     }
 
+    /**
+     * Runs the main input loop.
+     */
     public void run() {
         ui.showWelcome();
         loadTasks();
@@ -40,6 +51,9 @@ public class Main {
         }
     }
 
+    /**
+     * Loads tasks from storage, falling back to an empty list on failure.
+     */
     private void loadTasks() {
         try {
             Storage.LoadResult result = storage.load();
@@ -57,6 +71,11 @@ public class Main {
         }
     }
 
+    /**
+     * Program entry point.
+     *
+     * @param args ignored
+     */
     public static void main(String[] args) {
         new Main("data/list.txt").run();
     }
