@@ -1,3 +1,5 @@
+import java.util.function.BiConsumer;
+
 /**
  * Fixed-capacity list of tasks with basic operations.
  */
@@ -119,12 +121,31 @@ public class TaskList {
      */
     public TaskList find(String keyword) {
         TaskList matches = new TaskList(size);
+        find(keyword, (index, task) -> matches.addLoaded(task));
+        return matches;
+    }
+
+    /**
+     * Finds tasks that match the keyword and sends each match to the callback.
+     *
+     * @param keyword search term
+     * @param onMatch callback invoked with 1-based match index and task
+     * @return number of matches
+     */
+    public int find(String keyword, BiConsumer<Integer, Task> onMatch) {
+        if (keyword == null || keyword.isBlank()) {
+            return 0;
+        }
+        int matchCount = 0;
         for (int i = 0; i < size; i++) {
             if (tasks[i].matches(keyword)) {
-                matches.addLoaded(tasks[i]);
+                matchCount++;
+                if (onMatch != null) {
+                    onMatch.accept(matchCount, tasks[i]);
+                }
             }
         }
-        return matches;
+        return matchCount;
     }
 
     /**

@@ -138,18 +138,20 @@ public class Ui {
     /**
      * Displays find results.
      *
-     * @param matches matching tasks
+     * @param tasks task list to search
+     * @param keyword search term
      */
-    public void showFindResults(TaskList matches) {
-        if (matches.size() == 0) {
+    public void showFindResults(TaskList tasks, String keyword) {
+        StringBuilder output = new StringBuilder();
+        int matchCount = tasks.find(keyword, (index, task) -> output.append(index)
+                .append(". ")
+                .append(task.toPrintStatus())
+                .append("\n"));
+        if (matchCount == 0) {
             System.out.print("dont have such task...\n" + LINE);
             return;
         }
-        System.out.print("Here are the matching tasks in your list:\n");
-        for (int i = 0; i < matches.size(); i++) {
-            System.out.print((i + 1) + ". " + matches.get(i).toPrintStatus() + "\n");
-        }
-        System.out.print(LINE);
+        System.out.print("Here are the matching tasks in your list:\n" + output + LINE);
     }
 
     /**
