@@ -65,6 +65,8 @@ public class Storage {
 
     /**
      * Ensures the storage file and parent directory exist.
+     *
+     * @throws IOException if the directory or file cannot be created
      */
     public void doesFileExist() throws IOException {
         File f = new File(filePath);

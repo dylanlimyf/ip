@@ -58,7 +58,7 @@ public class TaskList {
      * Adds a task without throwing (used during load).
      *
      * @param task task to add
-     * @return true if added
+     * @return true if added (always true for ArrayList)
      */
     public boolean addLoaded(Task task) {
         tasks.add(task);

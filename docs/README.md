@@ -1,4 +1,4 @@
-# Duke User Guide
+# Slave User Guide
 
 Slave is a task chatbot that helps you track to-dos, deadlines, and events from a single command line.
 

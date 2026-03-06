@@ -44,6 +44,10 @@ public class Parser {
 
     /**
      * Parses a todo command.
+     *
+     * @param rest description text after the command word
+     * @return add command for a todo task
+     * @throws DukeException if the description is missing
      */
     private static Command parseTodo(String rest) throws DukeException {
         if (rest.isBlank()) {
@@ -54,6 +58,10 @@ public class Parser {
 
     /**
      * Parses a deadline command and validates the date.
+     *
+     * @param rest description and /by segment
+     * @return add command for a deadline task
+     * @throws DukeException if the format or date is invalid
      */
     private static Command parseDeadline(String rest) throws DukeException {
         if (rest.isBlank()) {
@@ -84,6 +92,10 @@ public class Parser {
 
     /**
      * Parses an event command with /from and /to.
+     *
+     * @param rest description and /from /to segments
+     * @return add command for an event task
+     * @throws DukeException if the format is invalid
      */
     private static Command parseEvent(String rest) throws DukeException {
         if (rest.isBlank()) {
@@ -101,6 +113,10 @@ public class Parser {
 
     /**
      * Parses a find command.
+     *
+     * @param rest keyword after the command word
+     * @return find command
+     * @throws DukeException if the keyword is missing
      */
     private static Command parseFind(String rest) throws DukeException {
         if (rest.isBlank()) {
@@ -111,6 +127,11 @@ public class Parser {
 
     /**
      * Parses a one-based index from a command line.
+     *
+     * @param input raw command line
+     * @param missingMessage message to show if the index is missing
+     * @return zero-based index
+     * @throws DukeException if the index is missing or not a number
      */
     private static int parseIndex(String input, String missingMessage) throws DukeException {
         String[] parts = input.trim().split("\\s+");

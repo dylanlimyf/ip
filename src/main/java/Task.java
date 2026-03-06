@@ -28,7 +28,6 @@ public class Task {
         isDone = false;
     }
 
-    //gets the status of the task, if done will be marked with X, else nothing
     /**
      * Returns the status icon for printing.
      *
@@ -41,7 +40,7 @@ public class Task {
     /**
      * Returns the type icon for printing/saving.
      *
-     * @return task type icon
+     * @return task type icon (default "?", subclasses override)
      */
     public String getTypeIcon(){
         return "?";
