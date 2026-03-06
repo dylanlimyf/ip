@@ -7,6 +7,8 @@ public class Main {
     private final Ui ui;
     private TaskList tasks;
 
+// This comment is added to accomplish the requirement for merge-pull-request
+    
     /**
      * Creates the app with a storage file path.
      *
