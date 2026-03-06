@@ -4,6 +4,7 @@ cd "$(dirname "$0")" || exit 1
 
 # create bin directory if it doesn't exist
 mkdir -p ../bin
+find ../bin -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
 
 # delete output from previous run
 rm -f ACTUAL.TXT EXPECTED-UNIX.TXT
@@ -29,14 +30,14 @@ restore_data() {
 trap restore_data EXIT
 
 # compile the code into the bin folder, terminates if error occurred
-if ! javac -cp ../src/main/java -Xlint:none -d ../bin ../src/main/java/*.java
+if ! javac -cp ../src/main/java -sourcepath ../src/main/java -Xlint:none -d ../bin ../src/main/java/duke/Main.java
 then
     echo "********** BUILD FAILURE **********"
     exit 1
 fi
 
 # run the program, feed commands from input.txt file and redirect output to ACTUAL.TXT
-java -classpath ../bin Main < input.txt > ACTUAL.TXT
+java -classpath ../bin duke.Main < input.txt > ACTUAL.TXT
 
 # normalize line endings before compare
 cp EXPECTED.TXT EXPECTED-UNIX.TXT

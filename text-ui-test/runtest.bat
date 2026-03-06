@@ -6,6 +6,8 @@ PUSHD "%SCRIPT_DIR%"
 
 REM create bin directory if it doesn't exist
 IF NOT EXIST "..\bin" MKDIR "..\bin"
+IF EXIST "..\bin\*.class" DEL /F /Q "..\bin\*.class"
+IF EXIST "..\bin\duke" RMDIR /S /Q "..\bin\duke"
 
 REM delete output from previous run
 IF EXIST "ACTUAL.TXT" DEL /F /Q "ACTUAL.TXT"
@@ -21,11 +23,11 @@ IF EXIST "%DATA_FILE%" MOVE /Y "%DATA_FILE%" "%BACKUP_FILE%" >NUL
 TYPE NUL > "%DATA_FILE%"
 
 REM compile the code into the bin folder
-JAVAC -cp "..\src\main\java" -Xlint:none -d "..\bin" "..\src\main\java\*.java"
+JAVAC -cp "..\src\main\java" -sourcepath "..\src\main\java" -Xlint:none -d "..\bin" "..\src\main\java\duke\Main.java"
 IF ERRORLEVEL 1 GOTO :BUILD_FAIL
 
 REM run the program, feed commands from input.txt and redirect output to ACTUAL.TXT
-JAVA -classpath "..\bin" Main < "input.txt" > "ACTUAL.TXT"
+JAVA -classpath "..\bin" duke.Main < "input.txt" > "ACTUAL.TXT"
 
 REM compare the output to the expected output
 FC "ACTUAL.TXT" "EXPECTED.TXT"
