@@ -21,6 +21,6 @@ public class AddCommand extends Command {
     public void execute(TaskList tasks, Ui ui, Storage storage) throws DukeException {
         tasks.add(task);
         ui.showAdded(task, tasks.size());
-        save(tasks, storage, ui);
+        save(tasks, storage);
     }
 }

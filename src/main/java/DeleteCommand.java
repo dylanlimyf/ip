@@ -24,6 +24,6 @@ public class DeleteCommand extends Command {
         }
         Task removed = tasks.remove(index);
         ui.showDeleted(removed, tasks.size());
-        save(tasks, storage, ui);
+        save(tasks, storage);
     }
 }

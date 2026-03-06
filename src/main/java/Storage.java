@@ -114,7 +114,7 @@ public class Storage {
                     }
                     Task task = parseLine(line);
                     tasks.addLoaded(task);
-                } catch (IllegalArgumentException corrupted) {
+                } catch (DukeException corrupted) {
                     // skip if file is corrupted
                     skipped++;
                 }
@@ -147,17 +147,18 @@ public class Storage {
      *
      * @param line raw saved line
      * @return parsed task
+     * @throws DukeException if the line is corrupted or invalid
      */
-    private Task parseLine(String line) {
+    private Task parseLine(String line) throws DukeException {
         // expected: TYPE | 0/1 | description [| date]
         String[] p = line.split("\\s*\\|\\s*");
         if (p.length < 3) {
-            throw new IllegalArgumentException("Bad line");
+            throw new DukeException("Bad line");
         }
 
         String type = p[0];
         if (!p[1].equals("0") && !p[1].equals("1")) {
-            throw new IllegalArgumentException("Bad done flag");
+            throw new DukeException("Bad done flag");
         }
         boolean done = p[1].equals("1");
         String description = p[2];
@@ -169,20 +170,20 @@ public class Storage {
             break;
         case "D":
             if (p.length < 4) {
-                throw new IllegalArgumentException("Missing deadline date");
+                throw new DukeException("Missing deadline date");
             }
             try {
                 LocalDate by = LocalDate.parse(p[3]);
                 t = new Deadlines(description, by);
             } catch (DateTimeParseException e) {
-                throw new IllegalArgumentException("Bad deadline date");
+                throw new DukeException("Bad deadline date");
             }
             break;
         case "E":
             t = new Events(description);
             break;
         default:
-            throw new IllegalArgumentException("Unknown type");
+            throw new DukeException("Unknown type");
         }
 
         if (done) {

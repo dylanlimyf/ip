@@ -34,6 +34,6 @@ public class MarkCommand extends Command {
             ui.showUnmarked(tasks.get(index));
         }
 
-        save(tasks, storage, ui);
+        save(tasks, storage);
     }
 }

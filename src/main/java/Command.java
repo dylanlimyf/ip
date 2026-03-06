@@ -23,13 +23,19 @@ public abstract class Command {
     }
 
     /**
-     * Saves the task list, reporting errors to the UI.
+     * Saves the task list.
+     *
+     * @throws DukeException if saving fails
      */
-    protected void save(TaskList tasks, Storage storage, Ui ui) {
+    protected void save(TaskList tasks, Storage storage) throws DukeException {
         try {
             storage.save(tasks);
         } catch (Exception e) {
-            ui.showSaveError(e.getMessage());
+            String details = e.getMessage();
+            if (details == null || details.isBlank()) {
+                throw new DukeException("could not save tasks");
+            }
+            throw new DukeException("could not save tasks: " + details);
         }
     }
 }
