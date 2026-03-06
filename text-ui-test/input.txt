@@ -1,10 +1,11 @@
 list
 todo read book
-deadline return book /by tomorrow
+deadline return book /by 2099-06-06
 event project meeting /from Mon 2pm /to Mon 4pm
 list
 mark 2
 unmark 2
+find book
 delete 1
 list
 bye

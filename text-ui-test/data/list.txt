@@ -1,0 +1,4 @@
+E | 0 | project meeting  (from: Mon 2pm  to: Mon 4pm)
+T | 0 | read book
+D | 0 | return book | 2099-06-06
+E | 0 | project meeting  (from: Mon 2pm  to: Mon 4pm)
