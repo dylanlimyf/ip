@@ -98,8 +98,6 @@ public class Storage {
         File f = new File(filePath);
         TaskList tasks = new TaskList();
         int skipped = 0;
-        boolean truncated = false;
-
         try (Scanner s = new Scanner(f)) {
             while (s.hasNextLine()) {
                 String line = s.nextLine().trim();
@@ -108,10 +106,6 @@ public class Storage {
                 }
 
                 try {
-                    if (tasks.isFull()) {
-                        truncated = true;
-                        continue;
-                    }
                     Task task = parseLine(line);
                     tasks.addLoaded(task);
                 } catch (DukeException corrupted) {
@@ -121,7 +115,7 @@ public class Storage {
             }
         }
 
-        return new LoadResult(tasks, skipped, truncated);
+        return new LoadResult(tasks, skipped, false);
     }
 
     // Level 7: save whenever list changes

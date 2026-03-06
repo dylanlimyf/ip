@@ -1,30 +1,29 @@
+import java.util.ArrayList;
 import java.util.function.BiConsumer;
 
 /**
- * Fixed-capacity list of tasks with basic operations.
+ * List of tasks with basic operations.
  */
 public class TaskList {
 
     private static final int DEFAULT_CAPACITY = 100;
 
-    private final Task[] tasks;
-    private int size;
+    private final ArrayList<Task> tasks;
 
     /**
-     * Creates a task list with default capacity.
+     * Creates a task list with default initial capacity.
      */
     public TaskList() {
         this(DEFAULT_CAPACITY);
     }
 
     /**
-     * Creates a task list with a custom capacity.
+     * Creates a task list with a custom initial capacity.
      *
-     * @param capacity maximum number of tasks
+     * @param capacity initial capacity for the list
      */
     public TaskList(int capacity) {
-        tasks = new Task[capacity];
-        size = 0;
+        tasks = new ArrayList<>(capacity);
     }
 
     /**
@@ -33,7 +32,7 @@ public class TaskList {
      * @return task count
      */
     public int size() {
-        return size;
+        return tasks.size();
     }
 
     /**
@@ -43,33 +42,26 @@ public class TaskList {
      * @return task at index
      */
     public Task get(int index) {
-        return tasks[index];
+        return tasks.get(index);
     }
 
     /**
-     * Adds a task, enforcing capacity.
+     * Adds a task.
      *
      * @param task task to add
-     * @throws DukeException if the list is full
      */
     public void add(Task task) throws DukeException {
-        if (isFull()) {
-            throw new DukeException("task list full, delete something first");
-        }
-        tasks[size++] = task;
+        tasks.add(task);
     }
 
     /**
-     * Adds a task without throwing on capacity (used during load).
+     * Adds a task without throwing (used during load).
      *
      * @param task task to add
-     * @return true if added, false if full
+     * @return true if added
      */
     public boolean addLoaded(Task task) {
-        if (isFull()) {
-            return false;
-        }
-        tasks[size++] = task;
+        tasks.add(task);
         return true;
     }
 
@@ -82,13 +74,7 @@ public class TaskList {
      */
     public Task remove(int index) throws DukeException {
         checkIndex(index);
-        Task removed = tasks[index];
-        for (int i = index; i < size - 1; i++) {
-            tasks[i] = tasks[i + 1];
-        }
-        tasks[size - 1] = null;
-        size--;
-        return removed;
+        return tasks.remove(index);
     }
 
     /**
@@ -99,7 +85,7 @@ public class TaskList {
      */
     public void mark(int index) throws DukeException {
         checkIndex(index);
-        tasks[index].mark();
+        tasks.get(index).mark();
     }
 
     /**
@@ -110,7 +96,7 @@ public class TaskList {
      */
     public void unmark(int index) throws DukeException {
         checkIndex(index);
-        tasks[index].unmark();
+        tasks.get(index).unmark();
     }
 
     /**
@@ -120,7 +106,7 @@ public class TaskList {
      * @return list of matching tasks
      */
     public TaskList find(String keyword) {
-        TaskList matches = new TaskList(size);
+        TaskList matches = new TaskList(tasks.size());
         find(keyword, (index, task) -> matches.addLoaded(task));
         return matches;
     }
@@ -137,24 +123,15 @@ public class TaskList {
             return 0;
         }
         int matchCount = 0;
-        for (int i = 0; i < size; i++) {
-            if (tasks[i].matches(keyword)) {
+        for (Task task : tasks) {
+            if (task.matches(keyword)) {
                 matchCount++;
                 if (onMatch != null) {
-                    onMatch.accept(matchCount, tasks[i]);
+                    onMatch.accept(matchCount, task);
                 }
             }
         }
         return matchCount;
-    }
-
-    /**
-     * Returns true if the list is at capacity.
-     *
-     * @return whether the list is full
-     */
-    public boolean isFull() {
-        return size >= tasks.length;
     }
 
     /**
@@ -164,8 +141,8 @@ public class TaskList {
      * @throws DukeException if index is invalid
      */
     private void checkIndex(int index) throws DukeException {
-        if (index < 0 || index >= size) {
-            throw new DukeException("task number must be between 1 and " + size);
+        if (index < 0 || index >= tasks.size()) {
+            throw new DukeException("task number must be between 1 and " + tasks.size());
         }
     }
 }
